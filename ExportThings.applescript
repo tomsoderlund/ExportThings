@@ -83,3 +83,5 @@ tell application "Things"
 	close access theFile
 	
 end tell
+
+do shell script "/usr/bin/afplay /System/Library/Sounds/Glass.aiff"
