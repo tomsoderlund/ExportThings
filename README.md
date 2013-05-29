@@ -9,7 +9,8 @@ and from reading the Things AppleScript Guide (rev 13).
 Notes
 -----
 
-- Tested with Things 2.0.1 and OS X Mountain Lion.
+- Tested with Things 2.2.1 and OS X Mountain Lion.
+- New afplay command in the end is fixed to using the Glass sound. Change to suit your taste.
 
 To dos
 ------
@@ -22,7 +23,7 @@ To dos
 Copyright & License
 -------------------
 
-Copyright (c) 2012 Dexter Ang
+Copyright (c) 2013 Dexter Ang
 
 ExportThings.applescript is released under the MIT license:
 
