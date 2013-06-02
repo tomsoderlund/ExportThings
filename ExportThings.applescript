@@ -5,6 +5,8 @@
 # Somewhat based on "Export Things to text file (ver 1)" by John Wittig
 # and from reading the Things AppleScript Guide (rev 13).
 #
+# Minor edits for enhanced configurability by Rob de Jonge - @robdejonge on Twitter
+#
 # Tested with Things 2.0.1 and OS X Mountain Lion
 #
 # TODO:
@@ -14,7 +16,36 @@
 # - For each exported ToDo, also include their tags and areas. Maybe.
 #
 
+
+# ------------------------------------------------------------------------------
+# settings
+# ------------------------------------------------------------------------------
+
+# set this to where the script should write it's output
 set theFilePath to (path to desktop as Unicode text) & "Things Backup.txt"
+
+# options are {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
+set theList to {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
+
+# original script set outputAppend to linefeed & "----------" & linefeed
+set outputAppend to linefeed & "----------" & linefeed
+
+# original script set outputHead to "----------" & linefeed
+set outputHeader to "----------" & linefeed
+
+set outputSectionHeaderPrefix to "| "
+
+# output configuration, set to true for each of the individual bits to be displayed
+property toggleTags : true
+property toggleDue : true
+property toggleNotes : true
+property toggleSectionHeader : true
+property togglePlaysound : true
+
+# ------------------------------------------------------------------------------
+# script
+# ------------------------------------------------------------------------------
+
 set theFile to (open for access file theFilePath with write permission)
 set eof of theFile to 0
 
@@ -25,13 +56,14 @@ tell application "Things"
 	log completed now
 	empty trash
 	
-	set theList to {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
-	
-	write "----------" & linefeed to theFile
+	write outputHeader to theFile
 	
 	repeat with theListItem in theList
 		
-		write "| " & theListItem & ":" & linefeed & linefeed to theFile
+		if toggleSectionHeader is true then
+			write outputSectionHeaderPrefix & theListItem & ":" & linefeed & linefeed to theFile
+		end if
+		
 		set toDos to to dos of list theListItem
 		repeat with toDo in toDos
 			set tdName to the name of toDo
@@ -39,10 +71,12 @@ tell application "Things"
 			set tdNotes to the notes of toDo
 			
 			write "- " & tdName & linefeed to theFile
-			if tdDueDate is not missing value then
+			
+			if tdDueDate is not missing value and toggleDue is true then
 				write ">> Due: " & date string of tdDueDate & linefeed to theFile
 			end if
-			if tdNotes is not "" then
+			
+			if tdNotes is not "" and toggleNotes is true then
 				# Append a "tab" to each line of tdNotes.
 				repeat with noteParagraph in paragraphs of tdNotes
 					write tab & noteParagraph & linefeed to theFile
@@ -71,17 +105,23 @@ tell application "Things"
 			end if
 		end repeat
 		
-		write linefeed & "----------" & linefeed to theFile
+		write outputAppend to theFile
 		
 	end repeat
 	
-	write "| Tags:" & linefeed & linefeed to theFile
-	repeat with aTag in tags
-		write "- " & name of aTag & linefeed to theFile
-	end repeat
+	if toggleTags is true then
+		write outputSectionHeaderPrefix & "Tags:" & linefeed & linefeed to theFile
+		repeat with aTag in tags
+			write "- " & name of aTag & linefeed to theFile
+		end repeat
+	end if
 	
 	close access theFile
 	
 end tell
 
-do shell script "/usr/bin/afplay /System/Library/Sounds/Glass.aiff"
+if togglePlaysound is true then
+	
+	do shell script "/usr/bin/afplay /System/Library/Sounds/Glass.aiff"
+	
+end if
