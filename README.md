@@ -6,11 +6,15 @@ An AppleScript for exporting Things database to the Desktop as Things Backup.txt
 Somewhat based on "Export Things to text file (ver 1)" by John Wittig<br />
 and from reading the Things AppleScript Guide (rev 13).
 
+With contributions by Rob de Jonge - @robdejonge on Twitter
+
 Notes
 -----
 
 - Tested with Things 2.2.1 and OS X Mountain Lion.
-- New afplay command in the end is fixed to using the Glass sound. Change to suit your taste.
+- New afplay command when script completes running.
+- Enhanced configurability and added wrapper to allow script to run without activating the application. Script no longer activates Things unless configured to do so. Output
+can now go to both disk and screen by configuring toggleShowOutput. When the application is not running and not activated by the script, the script will attempt to read previous output from disk and print this to screen.
 
 To dos
 ------

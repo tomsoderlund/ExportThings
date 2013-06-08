@@ -19,7 +19,7 @@
 # settings
 # ------------------------------------------------------------------------------
 
-global theList, outputAppend, outputHeader, outputSectionHeaderPrefix
+global theList, outputAppend, outputHeader, outputSectionHeaderPrefix, soundCompleted
 
 # configures which areas of Things should be included in output
 # options are {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
@@ -37,6 +37,9 @@ set outputSectionHeaderPrefix to "| "
 
 # configures the file where output is stored
 set theFilePath to (path to desktop as Unicode text) & "Things Backup.txt"
+
+# sound to play when script completes
+set soundCompleted to "/System/Library/Sounds/Glass.aiff"
 
 # set to TRUE, output will also list all active tags
 property toggleTags : true
@@ -206,6 +209,6 @@ end if
 
 if togglePlaysound is true then
 	
-	do shell script "/usr/bin/afplay /System/Library/Sounds/Glass.aiff"
+	do shell script "/usr/bin/afplay " & soundCompleted
 	
 end if
