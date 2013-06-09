@@ -1,74 +1,76 @@
-# ExportThings - for exporting Things database to the Desktop as Things Backup.txt
-# Dexter Ang - @thepoch on Twitter
-# Copyright (c) 2012, Dexter Ang
-#
-# Somewhat based on "Export Things to text file (ver 1)" by John Wittig
-# and from reading the Things AppleScript Guide (rev 13).
-#
-# With contributions by Rob de Jonge - @robdejonge on Twitter
-#
-# Tested with Things 2.0.1 and OS X Mountain Lion
-#
-# TODO:
-# - Get Repeating ToDos (currently no way via AppleScript).
-# - Make tags tab delimited by heirarchy.
-# - Export Areas. Maybe.
-# - For each exported ToDo, also include their tags and areas. Maybe.
+-- ExportThings - for exporting Things database to the Desktop as Things Backup.txt
+-- Dexter Ang - @thepoch on Twitter
+-- Copyright (c) 2012, Dexter Ang
+--
+-- Somewhat based on "Export Things to text file (ver 1)" by John Wittig
+-- and from reading the Things AppleScript Guide (rev 13).
+--
+-- With contributions by Rob de Jonge - @robdejonge on Twitter
+--
+-- Tested with Things 2.0.1 and OS X Mountain Lion
+--
+-- TODO:
+-- - Get Repeating ToDos (currently no way via AppleScript).
+-- - Make tags tab delimited by heirarchy.
+-- - Export Areas. Maybe.
+-- - For each exported ToDo, also include their tags and areas. Maybe.
 
-# ------------------------------------------------------------------------------
-# settings
-# ------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------
+-- settings
+-- ------------------------------------------------------------------------------
 
 global theList, outputAppend, outputHeader, outputSectionHeaderPrefix, soundCompleted
 
-# configures which areas of Things should be included in output
-# options are {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
-# original script set {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
+-- configures which areas of Things should be included in output
+-- options are {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
+-- original script set {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
 set theList to {"Inbox", "Today", "Next", "Scheduled", "Someday", "Projects"}
 
-# configures what should be added to the end of the output
-# original script set outputAppend to linefeed & "----------" & linefeed
+-- configures what should be added to the end of the output
+-- original script set outputAppend to linefeed & "----------" & linefeed
 set outputAppend to linefeed & "----------" & linefeed
 
-# configures the output of file and section headers
-# original script set outputHead to "----------" & linefeed
+-- configures the output of file and section headers
+-- original script set outputHead to "----------" & linefeed
 set outputHeader to "----------" & linefeed
 set outputSectionHeaderPrefix to "| "
 
-# configures the file where output is stored
+-- configures the file where output is stored
 set theFilePath to (path to desktop as Unicode text) & "Things Backup.txt"
 
-# sound to play when script completes
+-- set to TRUE, script will play a sound when completed
+property togglePlaysound : true
 set soundCompleted to "/System/Library/Sounds/Glass.aiff"
 
-# set to TRUE, output will also list all active tags
+-- set to TRUE, output will also list all active tags
 property toggleTags : true
 
-# set to TRUE, output for todo items will include due dates when set
+-- set to TRUE, output for todo items will include due dates when set
 property toggleDue : true
 
-# set to TRUE, output for todo items will include notes when set
+-- set to TRUE, output for todo items will include notes when set
 property toggleNotes : true
 
-# set to TRUE, output will include a header for each new section
+-- set to TRUE, output will include a header for each new section
 property toggleSectionHeader : true
 
-# set to TRUE, script will play a sound when completed
-property togglePlaysound : true
+-- set to TRUE, overdue tasks will be listed at the top of each section and marked as configured
+property togglePrioritizeOverdue : true
+property appendOverdue : " (overdue)"
 
-# set to TRUE, script will log completed items and empty the trash in Things
+-- set to TRUE, script will log completed items and empty the trash in Things
 property toggleCleanUp : true
 
-# set to TRUE, script will activate Things if it isn't running
-# set to FALSE and Things is not running, script will attempt to read previous output from disk
+-- set to TRUE, script will activate Things if it isn't running
+-- set to FALSE and Things is not running, script will attempt to read previous output from disk
 property toggleActivateIfNotRunning : true
 
-# set to TRUE, script will show output on screen
+-- set to TRUE, script will show output on screen
 property toggleShowOutput : false
 
-# ------------------------------------------------------------------------------
-# script
-# ------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------
+-- script
+-- ------------------------------------------------------------------------------
 
 on extractThings()
 	
@@ -94,9 +96,20 @@ on extractThings()
 				set tdDueDate to the due date of toDo
 				set tdNotes to the notes of toDo
 				
-				set extractedThings to extractedThings & "- " & tdName & linefeed
+				if togglePrioritizeOverdue is true and tdDueDate is not missing value and tdDueDate is less than (current date) then
+					
+					set extractedThings to "- " & tdName & appendOverdue & linefeed & extractedThings
+					
+				else
+					
+					set extractedThings to extractedThings & "- " & tdName & linefeed
+					
+				end if
+
 				
 				if tdDueDate is not missing value and toggleDue is true then
+
+
 					
 					set extractedThings to extractedThings & ">> Due: " & date string of tdDueDate & linefeed
 					
@@ -120,8 +133,17 @@ on extractThings()
 						set prtdName to the name of prToDo
 						set prtdDueDate to the due date of prToDo
 						set prtdNotes to the notes of prToDo
+
+										if togglePrioritizeOverdue is true and prtdDueDate is not missing value and prtdDueDate is less than (current date) then
+					
+					set extractedThings to "- " & prtdName & appendOverdue & linefeed & extractedThings
+					
+				else
+					
+					set extractedThings to extractedThings & "- " & prtdName & linefeed
+					
+				end if
 						
-						set extractedThings to extractedThings & tab & "- " & prtdName & linefeed
 						
 						if prtdDueDate is not missing value then
 							
@@ -178,7 +200,7 @@ if application "Things" is running then
 		end if
 	end tell
 	
-	set scriptOutput to extractThings()
+	set scriptOutput to scriptOutput & extractThings()
 	
 	set theFile to (open for access file (theFilePath) with write permission)
 	set eof of theFile to 0
