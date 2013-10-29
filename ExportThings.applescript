@@ -38,8 +38,10 @@ set outputSectionHeaderPrefix to "| "
 -- configures the file where output is stored
 set theFilePath to (path to desktop as Unicode text) & "Things Backup.txt"
 
--- set to TRUE, script will play a sound when completed
-property togglePlaysound : true
+-- set to TRUE, script will play a sound or display a notification when completed
+-- Notification Center only works on 10.9 right?
+property toggleNotify : true
+property useNotificationCenter : true
 set soundCompleted to "/System/Library/Sounds/Glass.aiff"
 
 -- set to TRUE, output will also list all active tags
@@ -229,8 +231,14 @@ if (toggleShowOutput is true and scriptOutput is not "") then
 	
 end if
 
-if togglePlaysound is true then
-	
-	do shell script "/usr/bin/afplay " & soundCompleted
+if toggleNotify is true then
+	-- code to check for OS version. UNUSED.
+	set os_version to do shell script "sw_vers -productVersion"
+
+	if useNotificationCenter is true then
+		display notification "ExportThings Completed" with title "ExportThings" sound name soundCompleted
+	else
+		do shell script "/usr/bin/afplay " & soundCompleted
+	end if
 	
 end if
