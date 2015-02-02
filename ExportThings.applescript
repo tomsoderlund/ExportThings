@@ -1,6 +1,7 @@
 -- ExportThings - for exporting Things database to the Desktop as Things Backup.txt
 -- Dexter Ang - @thepoch on Twitter
 -- Copyright (c) 2012, Dexter Ang
+-- Updated 2014 by @tomsoderlund
 --
 -- Somewhat based on "Export Things to text file (ver 1)" by John Wittig
 -- and from reading the Things AppleScript Guide (rev 13).
@@ -57,11 +58,11 @@ property toggleNotes : true
 property toggleSectionHeader : true
 
 -- set to TRUE, overdue tasks will be listed at the top of each section and marked as configured
-property togglePrioritizeOverdue : true
+property togglePrioritizeOverdue : false
 property appendOverdue : " (overdue)"
 
 -- set to TRUE, script will log completed items and empty the trash in Things
-property toggleCleanUp : true
+property toggleCleanUp : false
 
 -- set to TRUE, script will activate Things if it isn't running
 -- set to FALSE and Things is not running, script will attempt to read previous output from disk
@@ -86,7 +87,7 @@ on extractThings()
 			
 			if toggleSectionHeader is true then
 				
-				set extractedThings to outputHeader & outputSectionHeaderPrefix & theListItem & ":" & linefeed & linefeed
+				set extractedThings to extractedThings & outputHeader & outputSectionHeaderPrefix & theListItem & ":" & linefeed & linefeed
 				
 			end if
 			
@@ -100,18 +101,16 @@ on extractThings()
 				
 				if togglePrioritizeOverdue is true and tdDueDate is not missing value and tdDueDate is less than (current date) then
 					
-					set extractedThings to "- " & tdName & appendOverdue & linefeed & extractedThings
+					set extractedThings to extractedThings & "- " & tdName & appendOverdue & linefeed & extractedThings
 					
 				else
 					
 					set extractedThings to extractedThings & "- " & tdName & linefeed
 					
 				end if
-
+				
 				
 				if tdDueDate is not missing value and toggleDue is true then
-
-
 					
 					set extractedThings to extractedThings & ">> Due: " & date string of tdDueDate & linefeed
 					
@@ -135,16 +134,16 @@ on extractThings()
 						set prtdName to the name of prToDo
 						set prtdDueDate to the due date of prToDo
 						set prtdNotes to the notes of prToDo
-
-										if togglePrioritizeOverdue is true and prtdDueDate is not missing value and prtdDueDate is less than (current date) then
-					
-					set extractedThings to "- " & prtdName & appendOverdue & linefeed & extractedThings
-					
-				else
-					
-					set extractedThings to extractedThings & "- " & prtdName & linefeed
-					
-				end if
+						
+						if togglePrioritizeOverdue is true and prtdDueDate is not missing value and prtdDueDate is less than (current date) then
+							
+							set extractedThings to "- " & prtdName & appendOverdue & linefeed & extractedThings
+							
+						else
+							
+							set extractedThings to extractedThings & "- " & prtdName & linefeed
+							
+						end if
 						
 						
 						if prtdDueDate is not missing value then
@@ -153,7 +152,7 @@ on extractThings()
 							
 						end if
 						
-						if prtdNotes is not "" then
+						if prtdNotes is not "" and toggleNotes is true then
 							
 							repeat with prnoteParagraph in paragraphs of prtdNotes
 								
@@ -234,7 +233,7 @@ end if
 if toggleNotify is true then
 	-- code to check for OS version. UNUSED.
 	set os_version to do shell script "sw_vers -productVersion"
-
+	
 	if useNotificationCenter is true then
 		display notification "ExportThings Completed" with title "ExportThings" sound name soundCompleted
 	else
